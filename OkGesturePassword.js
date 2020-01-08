@@ -1,31 +1,30 @@
-
 import React, {
     Component,
-} from 'react'
+} from 'react';
 import {
     PanResponder,
     Dimensions,
     StyleSheet,
     View,
     Text,
-} from 'react-native'
-import PropTypes from 'prop-types'
+} from 'react-native';
+import PropTypes from 'prop-types';
 
-import * as Utils from './Utils'
-import Point from './Point'
-import Line from './Line'
-import Arrow from './Arrow'
+import * as Utils from './Utils';
+import Point from './Point';
+import Line from './Line';
+import Arrow from './Arrow';
 
-const padding = 38
-const borderWidth = 1
+const padding = 38;
+const borderWidth = 1;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         overflow: 'hidden',
     }
-})
+});
 
-const {width: deviceWidth, height: deviceHeight} = Dimensions.get('window')
+const {width: deviceWidth, height: deviceHeight} = Dimensions.get('window');
 
 export default class OkGesturePassword extends Component {
 
@@ -41,7 +40,7 @@ export default class OkGesturePassword extends Component {
         isWarning: false,
         showArrow: true,
         allowCross: true,
-    }
+    };
 
     static propTypes = {
         lineWidth: PropTypes.number,
@@ -56,14 +55,14 @@ export default class OkGesturePassword extends Component {
         showArrow: PropTypes.bool,
         allowCross: PropTypes.bool,
         onStart: PropTypes.func,
-        onMove:PropTypes.func,
+        onMove: PropTypes.func,
         onReset: PropTypes.func,
         onFinish: PropTypes.func,
     };
 
     // 构造
     constructor(props) {
-        super(props)
+        super(props);
 
         // 初始状态
         this.state = {
@@ -71,16 +70,16 @@ export default class OkGesturePassword extends Component {
             points: [],
             lines: [],
             arrows: [],
-        }
+        };
 
-        this._gestureAreaMarginHorizontal = (deviceWidth - props.gestureAreaLength) / 2
-        this._gestureAreaLeft = 0
-        this._gestureAreaTop = 0
-        this._pointRadius = (props.gestureAreaLength - padding * 2) / 8
-        this._currentPoint = null
-        this._currentLine = null
-        this._timer = null
-        this._sequence = []
+        this._gestureAreaMarginHorizontal = (deviceWidth - props.gestureAreaLength) / 2;
+        this._gestureAreaLeft = 0;
+        this._gestureAreaTop = 0;
+        this._pointRadius = (props.gestureAreaLength - padding * 2) / 8;
+        this._currentPoint = null;
+        this._currentLine = null;
+        this._timer = null;
+        this._sequence = [];
     }
 
     componentWillMount() {
@@ -92,7 +91,7 @@ export default class OkGesturePassword extends Component {
             onPanResponderMove: this._onTouchMove,
             onPanResponderRelease: this._onTouchEnd,
             onPanResponderTerminationRequest: () => false,
-        })
+        });
 
     }
 
@@ -117,26 +116,26 @@ export default class OkGesturePassword extends Component {
                 {this._renderPoints()}
                 {this.props.showArrow ? this._renderArrows() : null}
             </View>
-        )
+        );
     }
 
     componentWillUnmount() {
         if (this._timer != null) {
-            clearTimeout(this._timer)
-            this._timer = null
+            clearTimeout(this._timer);
+            this._timer = null;
         }
     }
 
     _onLayout = (e) => {
-        this._gestureAreaLeft = e.nativeEvent.layout.x
-        this._gestureAreaTop = e.nativeEvent.layout.y
-        this._initializePoints()
-    }
+        this._gestureAreaLeft = e.nativeEvent.layout.x;
+        this._gestureAreaTop = e.nativeEvent.layout.y;
+        this._initializePoints();
+    };
 
     _renderArrows() {
         return this.state.arrows.map((arrow, index) => {
             if (this.state.isWarning) {
-                arrow.color = this.props.warningColor
+                arrow.color = this.props.warningColor;
             }
             return (
                 <Arrow
@@ -151,8 +150,8 @@ export default class OkGesturePassword extends Component {
                         x: arrow.end.x - this._gestureAreaLeft,
                         y: arrow.end.y - this._gestureAreaTop,
                     }}/>
-            )
-        })
+            );
+        });
     }
 
     _renderPoints() {
@@ -170,14 +169,14 @@ export default class OkGesturePassword extends Component {
                     isWarning={point.isActive ? this.state.isWarning : false}
                     index={point.index}
                     position={point.position}/>
-            )
-        })
+            );
+        });
     }
 
     _renderLines() {
         return this.state.lines.map((line, index) => {
             if (this.state.isWarning) {
-                line.color = this.props.warningColor
+                line.color = this.props.warningColor;
             }
             return (
                 <Line
@@ -192,20 +191,20 @@ export default class OkGesturePassword extends Component {
                         x: line.end.x - this._gestureAreaLeft,
                         y: line.end.y - this._gestureAreaTop,
                     }}/>
-            )
-        })
+            );
+        });
     }
 
     _initializePoints() {
         //avoid repeat invoking(for android)
         if (this.state.points.length) {
-            return
+            return;
         }
 
-        let points = []
+        let points = [];
         for (let i = 0; i < 9; i++) {
-            let left = this._pointRadius * 3 * (i % 3) + padding
-            let top = this._pointRadius * 3 * Math.floor(i / 3) + padding
+            let left = this._pointRadius * 3 * (i % 3) + padding;
+            let top = this._pointRadius * 3 * Math.floor(i / 3) + padding;
             points.push({
                 index: i,
                 position: {
@@ -218,157 +217,155 @@ export default class OkGesturePassword extends Component {
                 },
                 isActive: false,
                 isWarning: false,
-            })
+            });
         }
         this.setState({
             points,
-        })
+        });
     }
 
     _getTouchPoint(location) {
-        console.log("_getTouchPoint:" + JSON.stringify(location))
+        console.log('_getTouchPoint:' + JSON.stringify(location));
         for (let point of this.state.points) {
             if (Utils.isPointInPath(location, point.origin, this._pointRadius)) {
-                console.log("point:" + JSON.stringify(point))
-                return point
+                console.log('point:' + JSON.stringify(point));
+                return point;
             }
         }
-        return null
+        return null;
     }
 
     _addSequence(index) {
         //if (~this._sequence.findIndex((item) => item === index)) {
         if (this._sequence.includes(index)) {
-            return
+            return;
         }
-        this._sequence.push(index)
+        this._sequence.push(index);
     }
 
     _addArrow(arrow) {
-        this.state.arrows.push(arrow)
-        let arrows = this.state.arrows
+        this.state.arrows.push(arrow);
+        let arrows = this.state.arrows;
         this.setState({
             arrows
-        })
+        });
     }
 
     _addLine(line) {
-        this.state.lines.push(line)
-        let lines = this.state.lines
+        this.state.lines.push(line);
+        let lines = this.state.lines;
         this.setState({
             lines
-        })
+        });
     }
 
     _updateLine(start, end) {
-        this._currentLine.start = start
-        this._currentLine.end = end
+        this._currentLine.start = start;
+        this._currentLine.end = end;
 
-        let lines = this.state.lines
+        let lines = this.state.lines;
         this.setState({
             lines
-        })
+        });
     }
 
     _setToActive(point) {
-        point.isActive = true
+        point.isActive = true;
         this.setState({
             points: this.state.points,
-        })
+        });
     }
 
     _reset() {
         let points = this.state.points.map((point, index) => {
-            point.isActive = false
-            return point
-        })
+            point.isActive = false;
+            return point;
+        });
         this.setState({
             isWarning: false,
             points: points,
             lines: [],
             arrows: [],
-        })
+        });
 
-        this._sequence = []
-        this._currentPoint = null
-        this._currentLine = null
+        this._sequence = [];
+        this._currentPoint = null;
+        this._currentLine = null;
 
         if (this.props.onReset) {
-            this.props.onReset()
+            this.props.onReset();
         }
     }
 
     _onTouchStart = (e, gestureState) => {
         if (this.props.onStart) {
-            this.props.onStart()
+            this.props.onStart();
         }
 
         if (this._timer != null) {
-            clearTimeout(this._timer)
-            this._timer = null
+            clearTimeout(this._timer);
+            this._timer = null;
         }
 
-        this._reset()
+        this._reset();
         let location = {
             x: e.nativeEvent.pageX,
             y: e.nativeEvent.pageY,
-        }
-        let point = this._getTouchPoint(location)
+        };
+        let point = this._getTouchPoint(location);
         if (point == null) {
-            return
+            return;
         }
 
-        this._addSequence(point.index)
-        this._setToActive(point)
-        if (this.props.onMove){
+        this._addSequence(point.index);
+        this._setToActive(point);
+        if (this.props.onMove) {
             this.props.onMove(point.index);
         }
-        this._currentPoint = point
+        this._currentPoint = point;
 
 
-    }
+    };
 
     _onTouchMove = (e, gestureState) => {
         let location = {
             x: e.nativeEvent.pageX,
             y: e.nativeEvent.pageY,
-        }
-        let point = this._getTouchPoint(location)
+        };
+        let point = this._getTouchPoint(location);
 
         if (point == null) {
             if (this._currentLine == null) {
-                return
+                return;
             }
-            this._updateLine(this._currentPoint.origin, location)
-        }
-        else {
+            this._updateLine(this._currentPoint.origin, location);
+        } else {
             if (this._currentLine == null) {
 
                 let line = {
                     start: point.origin,
                     end: location,
                     color: this.props.lineColor || this.props.activeColor,
-                }
-                this._addLine(line)
-                this._currentLine = line
+                };
+                this._addLine(line);
+                this._currentLine = line;
 
                 if (this._currentPoint != null) {
-                    return
+                    return;
                 }
-                this._addSequence(point.index)
-                this._setToActive(point)
-                this._currentPoint = point
-            }
-            else {
+                this._addSequence(point.index);
+                this._setToActive(point);
+                this._currentPoint = point;
+            } else {
                 if (point === this._currentPoint) {
                     this._updateLine(point.origin, location);
-                    return
+                    return;
                 }
 
                 //if (~this._sequence.findIndex((item) => item === point.index)) {
                 if (this._sequence.includes(point.index)) {
                     this._updateLine(this._currentPoint.origin, location);
-                    return
+                    return;
                 }
 
                 if (!this.props.allowCross) {
@@ -376,7 +373,7 @@ export default class OkGesturePassword extends Component {
                     if (crossPoint != null) {
                         console.log('_sequence:' + crossPoint.index);
                         this._addSequence(crossPoint.index);
-                        this._setToActive(crossPoint)
+                        this._setToActive(crossPoint);
                     }
                 }
 
@@ -385,55 +382,54 @@ export default class OkGesturePassword extends Component {
                     start: this._currentPoint.origin,
                     end: point.origin,
                     color: this.props.activeColor,
-                }
-                this._addArrow(arrow)
+                };
+                this._addArrow(arrow);
                 let line = {
                     start: point.origin,
                     end: location,
                     color: this.props.lineColor || this.props.activeColor,
-                }
-                this._addLine(line)
-                this._currentLine = line
+                };
+                this._addLine(line);
+                this._currentLine = line;
 
                 this._addSequence(point.index);
                 this._setToActive(point);
-                if (this.props.onMove){
+                if (this.props.onMove) {
                     this.props.onMove(point.index);
                 }
 
-                this._currentPoint = point
+                this._currentPoint = point;
             }
         }
 
-    }
+    };
 
     _onTouchEnd = (e, gestureState) => {
         if (this._sequence.length == 0) {
-            return
+            return;
         }
 
-        let points = this.state.points
-        let lines = this.state.lines
-        lines.pop()
+        let points = this.state.points;
+        let lines = this.state.lines;
+        lines.pop();
 
         this.setState({
             lines,
             points,
-        })
+        });
 
-        let password = Utils.getPassword(this._sequence)
+        let password = Utils.getPassword(this._sequence);
         if (this.props.onFinish) {
-            this.props.onFinish(password)
+            this.props.onFinish(password);
         }
 
         if (this.props.warningDuration > 0) {
             this._timer = setTimeout(() => {
-                this._reset()
-            }, this.props.warningDuration)
+                this._reset();
+            }, this.props.warningDuration);
+        } else {
+            this._reset();
         }
-        else {
-            this._reset()
-        }
-    }
+    };
 
 }
