@@ -140,7 +140,7 @@ export default class OkGesturePassword extends Component {
             return (
                 <Arrow
                     key={'arrow-' + index}
-                    width={this._pointRadius / 3}
+                    width={this._pointRadius * 0.8 / 3}
                     color={arrow.color}
                     start={{
                         x: arrow.start.x - this._gestureAreaLeft,
@@ -159,7 +159,7 @@ export default class OkGesturePassword extends Component {
             return (
                 <Point
                     key={'point-' + index}
-                    radius={this._pointRadius}
+                    radius={this._pointRadius * 0.8}
                     borderWidth={borderWidth}
                     backgroundColor={this.props.pointBackgroundColor}
                     color={this.props.color}
@@ -212,8 +212,8 @@ export default class OkGesturePassword extends Component {
                     top: top,
                 },
                 origin: {
-                    x: this._gestureAreaLeft + left + this._pointRadius,
-                    y: this._gestureAreaTop + top + this._pointRadius,
+                    x: this._gestureAreaLeft + left + this._pointRadius * 0.8,
+                    y: this._gestureAreaTop + top + this._pointRadius * 0.8,
                 },
                 isActive: false,
                 isWarning: false,
