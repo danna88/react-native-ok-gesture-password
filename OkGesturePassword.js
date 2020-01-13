@@ -212,11 +212,11 @@ export default class OkGesturePassword extends Component {
         index: i,
         position: {
           left: left,
-          top: top,
+          top: top - 20,
         },
         origin: {
           x: this._gestureAreaLeft + left + this._pointRadius * 0.8,
-          y: this._gestureAreaTop + top + this._pointRadius * 0.8,
+          y: this._gestureAreaTop + top + this._pointRadius * 0.8 - 20,
         },
         isActive: false,
         isWarning: false,
