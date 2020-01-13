@@ -206,7 +206,7 @@ export default class OkGesturePassword extends Component {
 
     let points = [];
     for (let i = 0; i < 9; i++) {
-      let left = this._pointRadius * 3 * (i % 3) + padding;
+      let left = this._pointRadius * 3 * (i % 3) + padding + this._pointRadius * 0.8 * 0.25;
       let top = this._pointRadius * 3 * Math.floor(i / 3) + padding;
       points.push({
         index: i,
@@ -408,7 +408,7 @@ export default class OkGesturePassword extends Component {
   };
 
   _onTouchEnd = (e, gestureState) => {
-    if (this._sequence.length == 0) {
+    if (this._sequence.length === 0) {
       return;
     }
 
