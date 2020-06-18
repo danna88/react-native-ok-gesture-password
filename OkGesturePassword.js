@@ -215,7 +215,7 @@ export default class OkGesturePassword extends Component {
       return (
         <Point
           key={'point-' + index}
-          radius={this._pointRadius}
+          radius={this._pointRadius - 2}
           borderWidth={borderWidth}
           backgroundColor={this.props.pointBackgroundColor}
           color={this.props.color}
@@ -271,8 +271,8 @@ export default class OkGesturePassword extends Component {
           top: top,
         },
         origin: {
-          x: this._gestureAreaLeft + left + this._pointRadius,
-          y: this._gestureAreaTop + top + this._pointRadius,
+          x: this._gestureAreaLeft + left + this._pointRadius - 2,
+          y: this._gestureAreaTop + top + this._pointRadius - 2,
         },
         isActive: false,
         isWarning: false,
