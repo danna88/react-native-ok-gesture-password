@@ -15,7 +15,7 @@ import Point from './Point';
 import Line from './Line';
 import Arrow from './Arrow';
 
-const padding = 38;
+const padding = 52;
 const borderWidth = 1;
 const styles = StyleSheet.create({
   container: {
@@ -41,6 +41,8 @@ export default class OkGesturePassword extends Component {
     isWarning: false,
     showArrow: true,
     allowCross: true,
+    isDebug: false,
+    viewDelay: 300,
   };
 
   static propTypes = {
@@ -60,6 +62,8 @@ export default class OkGesturePassword extends Component {
     onMove: PropTypes.func,
     onReset: PropTypes.func,
     onFinish: PropTypes.func,
+    isDebug: PropTypes.bool,
+    viewDelay: PropTypes.number,
   };
 
   // 构造
@@ -72,6 +76,7 @@ export default class OkGesturePassword extends Component {
       points: [],
       lines: [],
       arrows: [],
+      disabledView: true,
     };
 
     this._gestureAreaMarginHorizontal = (deviceWidth - props.gestureAreaLength) / 2;
@@ -106,6 +111,8 @@ export default class OkGesturePassword extends Component {
   render() {
     return (
       <View
+        ref={(ref) => this.viewRef = ref}
+        disabled={!this.state.disabledView}
         {...this._panResponder.panHandlers}
         onLayout={this._onLayout}
         style={[{
@@ -128,9 +135,56 @@ export default class OkGesturePassword extends Component {
     }
   }
 
+  Logd(...params) {
+    if (this.props.isDebug) {
+      console.log(...params);
+    }
+  }
+
+  recomputeLayout() {
+    if (this.viewRef && this.viewRef.measure) {
+      this.viewRef.measure((x, y, width, height, pageX, pageY) => {
+        // this.Logd (x, y, width, height, pageX, pageY);
+        if (this.viewRef) {
+
+          // when view animated , the screen position of view
+          // will be incorrect ,
+
+          this._gestureAreaLeft = pageX;
+          this._gestureAreaTop = pageY;
+          this._initializePoints(true);   // force to reflush layout
+
+          // enable touch
+          this.setState({disabledView: false});
+        }
+      });
+    }
+  }
+
   _onLayout = (e) => {
-    this._gestureAreaLeft = e.nativeEvent.layout.x;
-    this._gestureAreaTop = e.nativeEvent.layout.y;
+
+    //
+    // setTimeout (() => {} ,0)
+    // to avoid pageY 0 bug
+    //
+
+    // first to disable touch
+    // this.setState ({disabledView : false})
+
+    setTimeout(() => {
+
+      if (this && this.recomputeLayout)
+        this.recomputeLayout();
+
+    }, this.props.viewDelay);       //  delay to wait the view animation completed
+
+    // fix offsetY bug ,
+    // need to sub the screen offsetY in layout
+    //
+
+    // this._gestureAreaLeft = e.nativeEvent.layout.x
+    // this._gestureAreaTop = e.nativeEvent.layout.y
+
     this._initializePoints();
   };
 
@@ -142,8 +196,8 @@ export default class OkGesturePassword extends Component {
       return (
         <Arrow
           key={'arrow-' + index}
-          width={this._pointRadius * 0.8 / 3}
-          color={arrow.color}
+          width={this._pointRadius / 3}
+          color={this.props.lineColor || this.props.activeColor}
           start={{
             x: arrow.start.x - this._gestureAreaLeft,
             y: arrow.start.y - this._gestureAreaTop,
@@ -161,7 +215,7 @@ export default class OkGesturePassword extends Component {
       return (
         <Point
           key={'point-' + index}
-          radius={this._pointRadius * 0.8}
+          radius={this._pointRadius}
           borderWidth={borderWidth}
           backgroundColor={this.props.pointBackgroundColor}
           color={this.props.color}
@@ -184,7 +238,7 @@ export default class OkGesturePassword extends Component {
       return (
         <Line
           key={'line-' + index}
-          color={line.color}
+          color={this.props.lineColor || this.props.activeColor}
           lineWidth={this.props.lineWidth}
           start={{
             x: line.start.x - this._gestureAreaLeft,
@@ -198,25 +252,27 @@ export default class OkGesturePassword extends Component {
     });
   }
 
-  _initializePoints() {
+  _initializePoints(bForce) {
     //avoid repeat invoking(for android)
-    if (this.state.points.length) {
-      return;
+    if (!bForce) {
+      if (this.state.points.length) {
+        return;
+      }
     }
 
     let points = [];
     for (let i = 0; i < 9; i++) {
-      let left = this._pointRadius * 3 * (i % 3) + padding + this._pointRadius * 0.8 * 0.25;
+      let left = this._pointRadius * 3 * (i % 3) + padding;
       let top = this._pointRadius * 3 * Math.floor(i / 3) + padding;
       points.push({
         index: i,
         position: {
           left: left,
-          top: top - 20,
+          top: top,
         },
         origin: {
-          x: this._gestureAreaLeft + left + this._pointRadius * 0.8,
-          y: this._gestureAreaTop + top + this._pointRadius * 0.8 - 20,
+          x: this._gestureAreaLeft + left + this._pointRadius,
+          y: this._gestureAreaTop + top + this._pointRadius,
         },
         isActive: false,
         isWarning: false,
@@ -228,10 +284,10 @@ export default class OkGesturePassword extends Component {
   }
 
   _getTouchPoint(location) {
-    console.log('_getTouchPoint:' + JSON.stringify(location));
+    this.Logd('_getTouchPoint:' + JSON.stringify(location));
     for (let point of this.state.points) {
       if (Utils.isPointInPath(location, point.origin, this._pointRadius)) {
-        console.log('point:' + JSON.stringify(point));
+        this.Logd('point:' + JSON.stringify(point));
         return point;
       }
     }
@@ -301,6 +357,11 @@ export default class OkGesturePassword extends Component {
   }
 
   _onTouchStart = (e, gestureState) => {
+
+    if (this.state.disabledView) {
+      return;
+    }
+
     if (this.props.onStart) {
       this.props.onStart();
     }
@@ -331,10 +392,18 @@ export default class OkGesturePassword extends Component {
   };
 
   _onTouchMove = (e, gestureState) => {
+
+    if (this.state.disabledView) {
+      return;
+    }
+
     let location = {
       x: e.nativeEvent.pageX,
       y: e.nativeEvent.pageY,
     };
+
+    this.Logd('x = ', e.nativeEvent.pageX, 'y = ', e.nativeEvent.pageY);
+
     let point = this._getTouchPoint(location);
 
     if (point == null) {
@@ -374,7 +443,7 @@ export default class OkGesturePassword extends Component {
         if (!this.props.allowCross) {
           let crossPoint = Utils.getCrossPoint(this.state.points, this._currentPoint, point, this._pointRadius);
           if (crossPoint != null) {
-            console.log('_sequence:' + crossPoint.index);
+            this.Logd('_sequence:' + crossPoint.index);
             this._addSequence(crossPoint.index);
             this._setToActive(crossPoint);
           }
@@ -408,7 +477,12 @@ export default class OkGesturePassword extends Component {
   };
 
   _onTouchEnd = (e, gestureState) => {
-    if (this._sequence.length === 0) {
+
+    if (this.state.disabledView) {
+      return;
+    }
+
+    if (this._sequence.length == 0) {
       return;
     }
 
